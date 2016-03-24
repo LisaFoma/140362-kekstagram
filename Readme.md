@@ -1,8 +1,10 @@
 # Личный проект «Кекстаграм» [![Build status][travis-image]][travis-url] [![Dependency status][dependency-image]][dependency-url]
 
 * Студент: [Ирина Фомина](https://up.htmlacademy.ru/javascript/4/user/140362).
-* Наставник: `Неизвестно`.
+* Наставник: Дмитрий Ермаков`.
 
+* Немного о себе : род деятельности - лиса.
+* И еще одно изменение!
 ---
 
 _Не удаляйте и не обращайте внимание на файлы:_<br>
