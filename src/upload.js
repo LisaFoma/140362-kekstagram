@@ -23,6 +23,8 @@
     CUSTOM: 2
   };
 
+
+
   /**
    * Регулярное выражение, проверяющее тип загружаемого файла. Составляется
    * из ключей FileType.
@@ -67,12 +69,48 @@
     backgroundElement.style.backgroundImage = 'url(' + images[randomImageNumber] + ')';
   }
 
+
+    /**«слева» resize-x, «сторона» resize-size, «сверху» resize-y*/
+  var iDsleva = document.querySelector('#resize-x');
+  var iDsverhu = document.querySelector('#resize-y');
+  var iDstorona = document.querySelector('#resize-size');
+  iDsleva.min = 0;
+  iDsverhu.min = 0;
   /**
    * Проверяет, валидны ли данные, в форме кадрирования.
    * @return {boolean}
    */
   function resizeFormIsValid() {
-    return true;
+    console.log('sleva ' + iDsleva.value);
+    console.log('sverhu ' + iDsverhu.value);
+    console.log('storona ' + iDstorona.value);
+
+    /**Сумма значений полей «слева» resize-x и «сторона» resize-size не должна быть больше ширины исходного изображения.*/
+    var SlevaAndStorona = parseInt(iDsleva.value, 10) + parseInt(iDstorona.value, 10);
+
+    /**Сумма значений полей «сверху» resize-y и «сторона» resize-size не должна быть больше высоты исходного изображения.*/
+    var SverhuAndStorona = parseInt(iDsverhu.value, 10) + parseInt(iDstorona.value, 10);
+
+    if ((iDsleva.value === '') || (iDsverhu.value === '') || (iDstorona.value === '')) {
+      console.log( 'Хм... есть пустое поле!');
+      return false;
+    }else{
+      if (SlevaAndStorona <= currentResizer._image.naturalWidth) {
+        if (SverhuAndStorona > currentResizer._image.naturalHeight) {
+          console.log( 'Значение полей "СВЕРХУ" и "СТОРОНА" слишком велики! Пожалуйста, уменьшите их суммарное значение на ' + (SverhuAndStorona - currentResizer._image.naturalHeight));
+          alert ( 'Значение полей "СВЕРХУ" и "СТОРОНА" слишком велики! Пожалуйста, уменьшите их суммарное значение на ' + (SverhuAndStorona - currentResizer._image.naturalHeight));
+          return false;
+        }else{
+          return true;
+        }
+
+      }else{
+        console.log( 'Значение полей "СЛЕВА" и "СТОРОНА" слишком велики! Пожалуйста, уменьшите их суммарное значение на ' + (SlevaAndStorona - currentResizer._image.naturalWidth));
+        alert ( 'Значение полей "СЛЕВА" и "СТОРОНА" слишком велики! Пожалуйста, уменьшите их суммарное значение на ' + (SlevaAndStorona - currentResizer._image.naturalWidth));
+        return false;
+      }
+    }
+
   }
 
   /**
@@ -142,12 +180,13 @@
   uploadForm.onchange = function(evt) {
     var element = evt.target;
     if (element.id === 'upload-file') {
+
       // Проверка типа загружаемого файла, тип должен быть изображением
       // одного из форматов: JPEG, PNG, GIF или SVG.
       if (fileRegExp.test(element.files[0].type)) {
         var fileReader = new FileReader();
 
-        showMessage(Action.UPLOADING);
+        showMessage(Action.UPLOADING);//  сообщение Кексограмим
 
         fileReader.onload = function() {
           cleanupResizer();
@@ -160,9 +199,13 @@
           resizeForm.classList.remove('invisible');
 
           hideMessage();
+          iDsleva.max = currentResizer._image.naturalWidth;
+          iDsverhu.max = currentResizer._image.naturalHeight;
         };
 
+
         fileReader.readAsDataURL(element.files[0]);
+
       } else {
         // Показ сообщения об ошибке, если загружаемый файл, не является
         // поддерживаемым изображением.
@@ -186,6 +229,48 @@
     uploadForm.classList.remove('invisible');
   };
 
+  function buttonENABLED() {
+    document.getElementById('resize-fwd').style.background = 'rgba(255, 255, 255, 0.2) url("../img/icon-arrow.png") center no-repeat';
+    document.getElementById('resize-fwd').style.opacity = '1';
+    document.getElementById('resize-fwd').disabled = Boolean(false);
+  }
+  function buttonDISABLED() {
+    document.getElementById('resize-fwd').style.background = 'rgba(255, 255, 255, 0.2) url("../img/non-activ-icon-arrow.png") center no-repeat';
+    document.getElementById('resize-fwd').style.opacity = '0.4';
+    document.getElementById('resize-fwd').disabled = Boolean(true);
+  }
+
+
+  document.querySelector('#resize-x').onchange = function(evt) {
+    evt.preventDefault();
+    if (resizeFormIsValid()) {
+      //дел.кнопку активной
+      buttonENABLED();
+    }else{
+      //дел.кнопку не активной
+      buttonDISABLED();
+    }
+  };
+  document.querySelector('#resize-y').onchange = function(evt) {
+    evt.preventDefault();
+    if (resizeFormIsValid()) {
+      //дел.кнопку активной
+      buttonENABLED();
+    }else{
+      //дел.кнопку не активной
+      buttonDISABLED();
+    }
+  };
+  document.querySelector('#resize-size').onchange = function(evt) {
+    evt.preventDefault();
+    if (resizeFormIsValid()) {
+      //дел.кнопку активной
+      buttonENABLED();
+    }else{
+      //дел.кнопку не активной
+      buttonDISABLED();
+    }
+  };
   /**
    * Обработка отправки формы кадрирования. Если форма валидна, экспортирует
    * кропнутое изображение в форму добавления фильтра и показывает ее.
@@ -193,13 +278,12 @@
    */
   resizeForm.onsubmit = function(evt) {
     evt.preventDefault();
-
     if (resizeFormIsValid()) {
       filterImage.src = currentResizer.exportImage().src;
 
       resizeForm.classList.add('invisible');
       filterForm.classList.remove('invisible');
-    }
+    }/**  сообщение по доп.заданию писать тут в else*/
   };
 
   /**
